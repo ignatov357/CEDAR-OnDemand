@@ -10,16 +10,14 @@
     "persistent": false
   },
   "browser_action": {
-      "default_icon": "icon.png",
-	   "default_title": "CEDAR OnDemand"
+    "default_icon": "icon.png",
+	  "default_title": "CEDAR OnDemand"
   },
   "web_accessible_resources": [
    "jquery.autocomplete.css",
-	"cod_complete.js"
+   "selectize.default.css",
+   "tingle.css",
+	 "cod_complete.js"
   ],
   "manifest_version": 2
 }
-
-
-
-

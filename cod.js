@@ -1,76 +1,73 @@
-// JavaScript Document
-// Checking page title
-// JavaScript Document
-// Checking page title
-var s = document.createElement('script');
-var addNewJS= document.getElementsByTagName('style')[0];
+if(document.querySelectorAll('.tingle-modal.ontology_ids_selector_popup').length == 0) {
+	var modal = new tingle.modal({
+	    footer: true,
+	    stickyFooter: false,
+	    closeMethods: [],
+	    closeLabel: "Cancel",
+	    cssClass: ['ontology_ids_selector_popup']
+	});
 
-var defaultontologies;
-var ontologyvalues = prompt("CEDAR OnDemand uses the NCBITAXON,DOID,GO,OBI,PR,IDO,CL ontologies by default. \n\nYou can add your own coma separated BioPortal Ontologies IDs or Press OK to go with default ontologies. \n\n Note! You can add/remove ontologies later on anytime.   ", defaultontologies);
-if(ontologyvalues=="" || ontologyvalues=="NCBITAXON,DOID,GO,OBI,PR,IDO,CL" || ontologyvalues==null )
-{
- defaultontologies="NCBITAXON,DOID,GO,OBI,PR,IDO,CL";
+	modal.setContent('<p style="margin: 0px;">You can add/remove BioPortal Ontologies IDs.</p><p style="margin-top: 0px;">Note! You can add/remove ontologies later on anytime.</p><select id="ontology_ids" multiple></select>');
+	modal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary tingle-btn--pull-left', function() {
+		if(ontology_ids_selector.getValue() == '') {
+			return false;
+		} else {
+			var defaultontologies = ontology_ids_selector.getValue();
+			if(document.querySelectorAll('head meta[name=cedarOnDemandExtension_OntologyIds]').length == 0) {
+				var meta = document.createElement('meta');
+				meta.name = "cedarOnDemandExtension_OntologyIds";
+				meta.content = defaultontologies;
+				document.getElementsByTagName('head')[0].appendChild(meta);
+			} else {
+				document.querySelector('head meta[name=cedarOnDemandExtension_OntologyIds]').content = defaultontologies;
+			}
+		}
+
+		var s = document.createElement('script');
+		s.src = chrome.extension.getURL('cod_complete.js');
+		s.onload = function() {
+		    this.remove();
+		};
+		(document.head || document.documentElement).appendChild(s);
+
+ 		var style = document.createElement('link');
+		style.rel = 'stylesheet';
+		style.type = 'text/css';
+		style.href = chrome.extension.getURL('jquery.autocomplete.css');
+		(document.head||document.documentElement).appendChild(style);
+
+		var d = document.querySelectorAll("input[type=text]");
+		for (var i = 0; i < d.length; i++) {
+			d[i].className = "bp_form_complete-" + defaultontologies + "-name";
+			d[i].style.backgroundColor = "#f9f9d2";
+		}
+
+	    modal.close();
+	    document.querySelector('.tingle-modal.ontology_ids_selector_popup').remove();
+	});
+	modal.addFooterBtn('Cancel', 'tingle-btn tingle-btn--default tingle-btn--pull-left', function() {
+	    modal.close();
+	    document.querySelector('.tingle-modal.ontology_ids_selector_popup').remove();
+	});
+
+	modal.open();
+
+	defaultontologies = 'NCBITAXON,DOID,GO,OBI,PR,IDO,CL';
+	if(document.querySelectorAll('head meta[name=cedarOnDemandExtension_OntologyIds]').length > 0) {
+		defaultontologies = document.querySelector('head meta[name=cedarOnDemandExtension_OntologyIds]').content;
+	}
+	var $select = jQuery('select#ontology_ids').selectize({
+		options: [{value: "CPT", text: "CPT"}, {value: "MEDDRA", text: "MEDDRA"}, {value: "RXNORM", text: "RXNORM"}, {value: "SNOMEDCT", text: "SNOMEDCT"}, {value: "NDDF", text: "NDDF"}, {value: "EDAM", text: "EDAM"}, {value: "NDFRT", text: "NDFRT"}, {value: "LOINC", text: "LOINC"}, {value: "FMA", text: "FMA"}, {value: "DERMO", text: "DERMO"}, {value: "RADLEX", text: "RADLEX"}, {value: "NCIT", text: "NCIT"}, {value: "ECSO", text: "ECSO"}, {value: "RCD", text: "RCD"}, {value: "MESH", text: "MESH"}, {value: "ICD9CM", text: "ICD9CM"}, {value: "DOID", text: "DOID"}, {value: "VANDF", text: "VANDF"}, {value: "ENVO", text: "ENVO"}, {value: "UBERON", text: "UBERON"}, {value: "MONDO", text: "MONDO"}, {value: "SNMI", text: "SNMI"}, {value: "ATC", text: "ATC"}, {value: "ICD10", text: "ICD10"}, {value: "CTCAE", text: "CTCAE"}, {value: "PAE", text: "PAE"}, {value: "GO", text: "GO"}, {value: "WHO-ART", text: "WHO-ART"}, {value: "DRON", text: "DRON"}, {value: "SIO", text: "SIO"}, {value: "ICD10CM", text: "ICD10CM"}, {value: "BTO", text: "BTO"}, {value: "CL", text: "CL"}, {value: "BAO", text: "BAO"}, {value: "NCBITAXON", text: "NCBITAXON"}, {value: "HP", text: "HP"}, {value: "OMIM", text: "OMIM"}, {value: "EFO", text: "EFO"}, {value: "ORDO", text: "ORDO"}, {value: "SYMP", text: "SYMP"}, {value: "ADO", text: "ADO"}, {value: "ECO", text: "ECO"}, {value: "CHEBI", text: "CHEBI"}, {value: "SWO", text: "SWO"}, {value: "FB-DV", text: "FB-DV"}, {value: "ICD10PCS", text: "ICD10PCS"}, {value: "PDON", text: "PDON"}, {value: "PECO", text: "PECO"}, {value: "HL7", text: "HL7"}, {value: "KORO", text: "KORO"}, {value: "STATO", text: "STATO"}, {value: "UO", text: "UO"}, {value: "IDOMAL", text: "IDOMAL"}, {value: "ICNP", text: "ICNP"}, {value: "TAO", text: "TAO"}, {value: "ICF", text: "ICF"}, {value: "OBI", text: "OBI"}, {value: "REX", text: "REX"}, {value: "PTRANS", text: "PTRANS"}, {value: "VIVO", text: "VIVO"}, {value: "NIFSTD", text: "NIFSTD"}, {value: "CHEMINF", text: "CHEMINF"}, {value: "OGMS", text: "OGMS"}, {value: "CRISP", text: "CRISP"}, {value: "PSIMOD", text: "PSIMOD"}, {value: "DDO", text: "DDO"}, {value: "BRO", text: "BRO"}, {value: "IAO", text: "IAO"}, {value: "BFO", text: "BFO"}, {value: "PR", text: "PR"}, {value: "DCM", text: "DCM"}, {value: "HFO", text: "HFO"}, {value: "ZEA", text: "ZEA"}, {value: "MFOEM", text: "MFOEM"}, {value: "PEAO", text: "PEAO"}, {value: "OCRE", text: "OCRE"}, {value: "OBIB", text: "OBIB"}, {value: "CAO", text: "CAO"}, {value: "COSTART", text: "COSTART"}, {value: "DTO", text: "DTO"}, {value: "EO", text: "EO"}, {value: "GLYCO", text: "GLYCO"}, {value: "XAO", text: "XAO"}, {value: "TRIKMENANGJUDI", text: "TRIKMENANGJUDI"}, {value: "HUGO", text: "HUGO"}, {value: "BP", text: "BP"}, {value: "MDDB", text: "MDDB"}, {value: "PLOSTHES", text: "PLOSTHES"}, {value: "CHEAR", text: "CHEAR"}, {value: "EDDA", text: "EDDA"}, {value: "GALEN", text: "GALEN"}, {value: "PW", text: "PW"}, {value: "AERO", text: "AERO"}, {value: "BCGO", text: "BCGO"}, {value: "SWEET", text: "SWEET"}, {value: "ICW", text: "ICW"}, {value: "PATO", text: "PATO"}, {value: "OGG", text: "OGG"}, {value: "AMINO-ACID", text: "AMINO-ACID"}, {value: "OBOREL", text: "OBOREL"}, {value: "OCHV", text: "OCHV"}, {value: "OBOE-SBC", text: "OBOE-SBC"}, {value: "PO", text: "PO"}, {value: "CLO", text: "CLO"}, {value: "ROO", text: "ROO"}, {value: "ICD11-BODYSYSTEM", text: "ICD11-BODYSYSTEM"}, {value: "ZFA", text: "ZFA"}, {value: "FHHO", text: "FHHO"}, {value: "RCTONT", text: "RCTONT"}, {value: "RO", text: "RO"}, {value: "GEXO", text: "GEXO"}, {value: "XEO", text: "XEO"}, {value: "AI-RHEUM", text: "AI-RHEUM"}, {value: "APAONTO", text: "APAONTO"}, {value: "ICECI", text: "ICECI"}, {value: "MNR", text: "MNR"}, {value: "MEDLINEPLUS", text: "MEDLINEPLUS"}, {value: "ICPC", text: "ICPC"}, {value: "RCTV2", text: "RCTV2"}, {value: "TEO", text: "TEO"}, {value: "QUDT", text: "QUDT"}, {value: "GAMUTS", text: "GAMUTS"}, {value: "IDO", text: "IDO"}, {value: "ONTOAD", text: "ONTOAD"}, {value: "BP-METADATA", text: "BP-METADATA"}, {value: "PTO", text: "PTO"}, {value: "ISO639-2", text: "ISO639-2"}, {value: "ONTOPSYCHIA", text: "ONTOPSYCHIA"}, {value: "BIOMODELS", text: "BIOMODELS"}, {value: "BCTT", text: "BCTT"}, {value: "ICPC2P", text: "ICPC2P"}, {value: "RH-MESH", text: "RH-MESH"}, {value: "TTO", text: "TTO"}, {value: "CPTAC", text: "CPTAC"}, {value: "GEOSPECIES", text: "GEOSPECIES"}, {value: "EPSO", text: "EPSO"}, {value: "NPI", text: "NPI"}, {value: "SYN", text: "SYN"}, {value: "EDAM-BIOIMAGING", text: "EDAM-BIOIMAGING"}, {value: "ABA-AMB", text: "ABA-AMB"}, {value: "MA", text: "MA"}, {value: "GO-PLUS", text: "GO-PLUS"}, {value: "PHYLONT", text: "PHYLONT"}, {value: "SO", text: "SO"}, {value: "PEDTERM", text: "PEDTERM"}, {value: "TMO", text: "TMO"}, {value: "DERMLEX", text: "DERMLEX"}, {value: "SCHEMA", text: "SCHEMA"}, {value: "OMRSE", text: "OMRSE"}, {value: "ISO19115MI", text: "ISO19115MI"}, {value: "NMR", text: "NMR"}, {value: "CNO", text: "CNO"}, {value: "FOODON", text: "FOODON"}, {value: "OAE", text: "OAE"}, {value: "IDODEN", text: "IDODEN"}, {value: "CEDARVS", text: "CEDARVS"}, {value: "OOSTT", text: "OOSTT"}, {value: "APOLLO-SV", text: "APOLLO-SV"}, {value: "SPD", text: "SPD"}, {value: "MS", text: "MS"}, {value: "CEDARPC", text: "CEDARPC"}, {value: "MSO", text: "MSO"}, {value: "ACGT-MO", text: "ACGT-MO"}, {value: "ENM", text: "ENM"}, {value: "DSEO", text: "DSEO"}, {value: "CTO", text: "CTO"}, {value: "PDQ", text: "PDQ"}, {value: "FB-BT", text: "FB-BT"}, {value: "ECG", text: "ECG"}, {value: "GML", text: "GML"}, {value: "STY", text: "STY"}, {value: "BIPON", text: "BIPON"}, {value: "MOOCCIADO", text: "MOOCCIADO"}, {value: "AURA", text: "AURA"}, {value: "AAO", text: "AAO"}, {value: "EPILONT", text: "EPILONT"}, {value: "OGMD", text: "OGMD"}, {value: "DMTO", text: "DMTO"}, {value: "HIV", text: "HIV"}, {value: "OCDM", text: "OCDM"}, {value: "NLMVS", text: "NLMVS"}, {value: "BCO", text: "BCO"}, {value: "MMO", text: "MMO"}, {value: "ASDPTO", text: "ASDPTO"}, {value: "GFO", text: "GFO"}, {value: "BIRNLEX", text: "BIRNLEX"}, {value: "PHARE", text: "PHARE"}, {value: "FTC", text: "FTC"}, {value: "ISO19115", text: "ISO19115"}, {value: "EOL", text: "EOL"}, {value: "SEDI", text: "SEDI"}, {value: "HAO", text: "HAO"}, {value: "PSDS", text: "PSDS"}, {value: "GRO", text: "GRO"}, {value: "HRDO", text: "HRDO"}, {value: "ONTODT", text: "ONTODT"}, {value: "ADAR", text: "ADAR"}, {value: "BT", text: "BT"}, {value: "EMO", text: "EMO"}, {value: "MF", text: "MF"}, {value: "MATRELEMENT", text: "MATRELEMENT"}, {value: "CSSO", text: "CSSO"}, {value: "EP", text: "EP"}, {value: "ISO19115CC", text: "ISO19115CC"}, {value: "PDO", text: "PDO"}, {value: "ADW", text: "ADW"}, {value: "OPE", text: "OPE"}, {value: "NPO", text: "NPO"}, {value: "CPRO", text: "CPRO"}, {value: "suicideo", text: "suicideo"}, {value: "PCO", text: "PCO"}, {value: "SOPHARM", text: "SOPHARM"}, {value: "ONS", text: "ONS"}, {value: "VIVO-ISF", text: "VIVO-ISF"}, {value: "SDO", text: "SDO"}, {value: "RS", text: "RS"}, {value: "MATRCOMPOUND", text: "MATRCOMPOUND"}, {value: "HIVO004", text: "HIVO004"}, {value: "GDCO", text: "GDCO"}, {value: "MI", text: "MI"}, {value: "ONTODM-KDD", text: "ONTODM-KDD"}, {value: "FOAF", text: "FOAF"}, {value: "COGPO", text: "COGPO"}, {value: "FALDO", text: "FALDO"}, {value: "CANONT", text: "CANONT"}, {value: "SSN", text: "SSN"}, {value: "PHAGE", text: "PHAGE"}, {value: "CDAO", text: "CDAO"}, {value: "BMT", text: "BMT"}, {value: "SEQ", text: "SEQ"}, {value: "ONTODM-CORE", text: "ONTODM-CORE"}, {value: "FBbi", text: "FBbi"}, {value: "ROS", text: "ROS"}, {value: "BHO", text: "BHO"}, {value: "MP", text: "MP"}, {value: "SPO", text: "SPO"}, {value: "MO", text: "MO"}, {value: "MPATH", text: "MPATH"}, {value: "HUPSON", text: "HUPSON"}, {value: "IMMDIS", text: "IMMDIS"}, {value: "MCCL", text: "MCCL"}, {value: "OGR", text: "OGR"}, {value: "FAST-TOPICAL", text: "FAST-TOPICAL"}, {value: "FB-SP", text: "FB-SP"}, {value: "SBO", text: "SBO"}, {value: "EHDAA", text: "EHDAA"}, {value: "SMASH", text: "SMASH"}, {value: "OGI", text: "OGI"}, {value: "FDSAJFAHSJK", text: "FDSAJFAHSJK"}, {value: "CSEO", text: "CSEO"}, {value: "VTO", text: "VTO"}, {value: "ABD", text: "ABD"}, {value: "DCAT", text: "DCAT"}, {value: "UNITSONT", text: "UNITSONT"}, {value: "APACOMPUTER", text: "APACOMPUTER"}, {value: "MAMO", text: "MAMO"}, {value: "ONTONEO", text: "ONTONEO"}, {value: "SSO", text: "SSO"}, {value: "ONTOLURGENCES", text: "ONTOLURGENCES"}, {value: "CHMO", text: "CHMO"}, {value: "FAST-GENREFORM", text: "FAST-GENREFORM"}, {value: "OCMR", text: "OCMR"}, {value: "SEP", text: "SEP"}, {value: "DINTO", text: "DINTO"}, {value: "ATOL", text: "ATOL"}, {value: "MOOCULADO", text: "MOOCULADO"}, {value: "EXACT", text: "EXACT"}, {value: "CSO", text: "CSO"}, {value: "PDO_CAS", text: "PDO_CAS"}, {value: "DDANAT", text: "DDANAT"}, {value: "NIFDYS", text: "NIFDYS"}, {value: "MFOMD", text: "MFOMD"}, {value: "TMA", text: "TMA"}, {value: "OPL", text: "OPL"}, {value: "OA", text: "OA"}, {value: "DAO", text: "DAO"}, {value: "VDOT", text: "VDOT"}, {value: "GENE-CDS", text: "GENE-CDS"}, {value: "MATRROCK", text: "MATRROCK"}, {value: "CANCO", text: "CANCO"}, {value: "VEO", text: "VEO"}, {value: "TOP-MENELAS", text: "TOP-MENELAS"}, {value: "M-PARTOF", text: "M-PARTOF"}, {value: "ISO19115PR", text: "ISO19115PR"}, {value: "FLU", text: "FLU"}, {value: "CU-VO", text: "CU-VO"}, {value: "MOVIE", text: "MOVIE"}, {value: "ONTOPARON_SOCIAL", text: "ONTOPARON_SOCIAL"}, {value: "TIME", text: "TIME"}, {value: "MSTDE-FRE", text: "MSTDE-FRE"}, {value: "PMR", text: "PMR"}, {value: "FAO", text: "FAO"}, {value: "HEIO", text: "HEIO"}, {value: "ERO", text: "ERO"}, {value: "WB-PHENOTYPE", text: "WB-PHENOTYPE"}, {value: "RDAU", text: "RDAU"}, {value: "EHDA", text: "EHDA"}, {value: "PHARMGKB", text: "PHARMGKB"}, {value: "GRO-CPGA", text: "GRO-CPGA"}, {value: "SURGICAL", text: "SURGICAL"}, {value: "AO", text: "AO"}, {value: "REXO", text: "REXO"}, {value: "HGNC", text: "HGNC"}, {value: "ADALAB-META", text: "ADALAB-META"}, {value: "BIOMO", text: "BIOMO"}, {value: "RNAO", text: "RNAO"}, {value: "VO", text: "VO"}, {value: "EXON", text: "EXON"}, {value: "HCPCS", text: "HCPCS"}, {value: "GLYCORDF", text: "GLYCORDF"}, {value: "ISO19115TCC", text: "ISO19115TCC"}, {value: "CIINTEADO", text: "CIINTEADO"}, {value: "HORD", text: "HORD"}, {value: "TAXRANK", text: "TAXRANK"}, {value: "VHOG", text: "VHOG"}, {value: "CABRO", text: "CABRO"}, {value: "BRCT", text: "BRCT"}, {value: "MSTDE", text: "MSTDE"}, {value: "OBCS", text: "OBCS"}, {value: "MIRNAO", text: "MIRNAO"}, {value: "RPO", text: "RPO"}, {value: "GAZ", text: "GAZ"}, {value: "ONTOPNEUMO", text: "ONTOPNEUMO"}, {value: "PROVO", text: "PROVO"}, {value: "MATR", text: "MATR"}, {value: "ROLEO", text: "ROLEO"}, {value: "ONL-MR-DA", text: "ONL-MR-DA"}, {value: "InterNano", text: "InterNano"}, {value: "MOC", text: "MOC"}, {value: "DIKB", text: "DIKB"}, {value: "FYPO", text: "FYPO"}, {value: "OHMI", text: "OHMI"}, {value: "SHR", text: "SHR"}, {value: "VICO", text: "VICO"}, {value: "GFVO", text: "GFVO"}, {value: "DUO", text: "DUO"}, {value: "WB-BT", text: "WB-BT"}, {value: "PMA", text: "PMA"}, {value: "SAO", text: "SAO"}, {value: "GVP", text: "GVP"}, {value: "CARO", text: "CARO"}, {value: "FLOPO", text: "FLOPO"}, {value: "HC", text: "HC"}, {value: "CN", text: "CN"}, {value: "DIAB", text: "DIAB"}, {value: "UPHENO", text: "UPHENO"}, {value: "TOK", text: "TOK"}, {value: "DOCCC", text: "DOCCC"}, {value: "ONL-DP", text: "ONL-DP"}, {value: "AEO", text: "AEO"}, {value: "ORTH", text: "ORTH"}, {value: "COLL", text: "COLL"}, {value: "BSPO", text: "BSPO"}, {value: "BNO", text: "BNO"}, {value: "CO-WHEAT", text: "CO-WHEAT"}, {value: "CTONT", text: "CTONT"}, {value: "ICPS", text: "ICPS"}, {value: "PP", text: "PP"}, {value: "VSAO", text: "VSAO"}, {value: "ESSO", text: "ESSO"}, {value: "NCCO", text: "NCCO"}, {value: "PAV", text: "PAV"}, {value: "IFAR", text: "IFAR"}, {value: "ISO19108TO", text: "ISO19108TO"}, {value: "NATPRO", text: "NATPRO"}, {value: "NBO", text: "NBO"}, {value: "JERM", text: "JERM"}, {value: "NCCNEHR", text: "NCCNEHR"}, {value: "PATHLEX", text: "PATHLEX"}, {value: "ICO", text: "ICO"}, {value: "OMV", text: "OMV"}, {value: "OFSMR", text: "OFSMR"}, {value: "MOOCCUADO", text: "MOOCCUADO"}, {value: "LIFO", text: "LIFO"}, {value: "AGRO", text: "AGRO"}, {value: "EGO", text: "EGO"}, {value: "ISO19115ROLES", text: "ISO19115ROLES"}, {value: "FB-CV", text: "FB-CV"}, {value: "EMAPA", text: "EMAPA"}, {value: "CTENO", text: "CTENO"}, {value: "GBM", text: "GBM"}, {value: "OGSF", text: "OGSF"}, {value: "NCRO", text: "NCRO"}, {value: "PHENOMEBLAST", text: "PHENOMEBLAST"}, {value: "CNOT", text: "CNOT"}, {value: "BTSE", text: "BTSE"}, {value: "GFO-BIO", text: "GFO-BIO"}, {value: "IDCLOUDSEO", text: "IDCLOUDSEO"}, {value: "ISO19110", text: "ISO19110"}, {value: "TRANS", text: "TRANS"}, {value: "MOP", text: "MOP"}, {value: "BE", text: "BE"}, {value: "MEDO", text: "MEDO"}, {value: "OARCS", text: "OARCS"}, {value: "PE-O", text: "PE-O"}, {value: "COGAT", text: "COGAT"}, {value: "CCONT", text: "CCONT"}, {value: "ONTOKBCF", text: "ONTOKBCF"}, {value: "PDUMDV", text: "PDUMDV"}, {value: "ISO19115CON", text: "ISO19115CON"}, {value: "TM-OTHER-FACTORS", text: "TM-OTHER-FACTORS"}, {value: "RB", text: "RB"}, {value: "APADISORDERS", text: "APADISORDERS"}, {value: "PSO", text: "PSO"}, {value: "SIBO", text: "SIBO"}, {value: "LHN", text: "LHN"}, {value: "TMF", text: "TMF"}, {value: "CEPH", text: "CEPH"}, {value: "GINAS", text: "GINAS"}, {value: "GTO", text: "GTO"}, {value: "MHCRO", text: "MHCRO"}, {value: "PDRO", text: "PDRO"}, {value: "VARIO", text: "VARIO"}, {value: "ISO-ANNOTATIONS", text: "ISO-ANNOTATIONS"}, {value: "FAST-FORMGENRE", text: "FAST-FORMGENRE"}, {value: "TM-SIGNS-AND-SYMPTS", text: "TM-SIGNS-AND-SYMPTS"}, {value: "ONTO_TEST_1", text: "ONTO_TEST_1"}, {value: "LEGALAPATEST2", text: "LEGALAPATEST2"}, {value: "FIRE", text: "FIRE"}, {value: "MICRO", text: "MICRO"}, {value: "NTDO", text: "NTDO"}, {value: "PHMAMMADO", text: "PHMAMMADO"}, {value: "OPB", text: "OPB"}, {value: "MWLA", text: "MWLA"}, {value: "APASTATISTICAL", text: "APASTATISTICAL"}, {value: "OBA", text: "OBA"}, {value: "TRAK", text: "TRAK"}, {value: "DDI", text: "DDI"}, {value: "GMM", text: "GMM"}, {value: "SITBAC", text: "SITBAC"}, {value: "FALL", text: "FALL"}, {value: "ZFS", text: "ZFS"}, {value: "BHN", text: "BHN"}, {value: "CVAO", text: "CVAO"}, {value: "BOLA57", text: "BOLA57"}, {value: "TGMA", text: "TGMA"}, {value: "PHFUMIADO", text: "PHFUMIADO"}, {value: "CIO", text: "CIO"}, {value: "IXNO", text: "IXNO"}, {value: "ONTOTOXNUC", text: "ONTOTOXNUC"}, {value: "MEO", text: "MEO"}, {value: "CCON", text: "CCON"}, {value: "HAROREADO", text: "HAROREADO"}, {value: "IGTO", text: "IGTO"}, {value: "CISAVIADO", text: "CISAVIADO"}, {value: "IAML-MOP", text: "IAML-MOP"}, {value: "BDO", text: "BDO"}, {value: "BAO-GPCR", text: "BAO-GPCR"}, {value: "NIHSS", text: "NIHSS"}, {value: "HO", text: "HO"}, {value: "OBIWS", text: "OBIWS"}, {value: "FAST-EVENT-SKOS", text: "FAST-EVENT-SKOS"}, {value: "GEOSPARQL", text: "GEOSPARQL"}, {value: "MAT", text: "MAT"}, {value: "DDIO", text: "DDIO"}, {value: "ANCESTRO", text: "ANCESTRO"}, {value: "TM-CONST", text: "TM-CONST"}, {value: "SSE", text: "SSE"}, {value: "ISO19115EX", text: "ISO19115EX"}, {value: "GENO", text: "GENO"}, {value: "RNRMU", text: "RNRMU"}, {value: "TADS", text: "TADS"}, {value: "SURAT-LAMAR", text: "SURAT-LAMAR"}, {value: "CKDO", text: "CKDO"}, {value: "TYPON", text: "TYPON"}, {value: "PE", text: "PE"}, {value: "OHD", text: "OHD"}, {value: "HCODONONT", text: "HCODONONT"}, {value: "SD3", text: "SD3"}, {value: "CHD", text: "CHD"}, {value: "NGSONTO", text: "NGSONTO"}, {value: "MIXSCV", text: "MIXSCV"}, {value: "EDDA_PT", text: "EDDA_PT"}, {value: "DC", text: "DC"}, {value: "RSA", text: "RSA"}, {value: "RDL", text: "RDL"}, {value: "ADALAB", text: "ADALAB"}, {value: "APAEDUCLUSTER", text: "APAEDUCLUSTER"}, {value: "ISO19115DI", text: "ISO19115DI"}, {value: "TRON", text: "TRON"}, {value: "EBP", text: "EBP"}, {value: "SPTO", text: "SPTO"}, {value: "DCO-DEBUGIT", text: "DCO-DEBUGIT"}, {value: "FAST-TITLE", text: "FAST-TITLE"}, {value: "MFMO", text: "MFMO"}, {value: "IT", text: "IT"}, {value: "MRO", text: "MRO"}, {value: "ADMIN", text: "ADMIN"}, {value: "CYTO", text: "CYTO"}, {value: "CIDOC-CRM", text: "CIDOC-CRM"}, {value: "MCCV", text: "MCCV"}, {value: "LPT", text: "LPT"}, {value: "INM-NPI", text: "INM-NPI"}, {value: "NONRCTO", text: "NONRCTO"}, {value: "OntoVIP", text: "OntoVIP"}, {value: "CEPATHAMIL", text: "CEPATHAMIL"}, {value: "CARRE", text: "CARRE"}, {value: "HIVCRS", text: "HIVCRS"}, {value: "BCTEO", text: "BCTEO"}, {value: "OLATDV", text: "OLATDV"}, {value: "OGDI", text: "OGDI"}, {value: "pseudo", text: "pseudo"}, {value: "NMOBR", text: "NMOBR"}, {value: "IMGT-ONTOLOGY", text: "IMGT-ONTOLOGY"}, {value: "OMIT", text: "OMIT"}, {value: "VCARD", text: "VCARD"}, {value: "ENTITYCANDIDATES", text: "ENTITYCANDIDATES"}, {value: "OMIABIS", text: "OMIABIS"}, {value: "MIAPA", text: "MIAPA"}, {value: "DIDEO", text: "DIDEO"}, {value: "FIX", text: "FIX"}, {value: "LIPRO", text: "LIPRO"}, {value: "CMO", text: "CMO"}, {value: "OVAE", text: "OVAE"}, {value: "MSV", text: "MSV"}, {value: "PREGONTO", text: "PREGONTO"}, {value: "HAAURAADO", text: "HAAURAADO"}, {value: "MEDEON", text: "MEDEON"}, {value: "PCMO", text: "PCMO"}, {value: "HINO", text: "HINO"}, {value: "MADS-RDF", text: "MADS-RDF"}, {value: "CCTOO", text: "CCTOO"}, {value: "ENTITY", text: "ENTITY"}, {value: "WSIO", text: "WSIO"}, {value: "NORREG", text: "NORREG"}, {value: "APO", text: "APO"}, {value: "MPO", text: "MPO"}, {value: "NIFSUBCELL", text: "NIFSUBCELL"}, {value: "FISH-AST", text: "FISH-AST"}, {value: "TRIAGE", text: "TRIAGE"}, {value: "WIKIPATHWAYS", text: "WIKIPATHWAYS"}, {value: "PROCCHEMICAL", text: "PROCCHEMICAL"}, {value: "SOY", text: "SOY"}, {value: "LDA", text: "LDA"}, {value: "LCGFT", text: "LCGFT"}, {value: "NEUMORE", text: "NEUMORE"}, {value: "MANTANPESINDEN", text: "MANTANPESINDEN"}, {value: "MEGO", text: "MEGO"}, {value: "BRO_ACRONYM", text: "BRO_ACRONYM"}, {value: "IDQA", text: "IDQA"}, {value: "DCCDFV", text: "DCCDFV"}, {value: "GVANOS", text: "GVANOS"}, {value: "NHSQI2009", text: "NHSQI2009"}, {value: "BRIDG", text: "BRIDG"}, {value: "TEST", text: "TEST"}, {value: "CCO", text: "CCO"}, {value: "ONLIRA", text: "ONLIRA"}, {value: "CEI-10", text: "CEI-10"}, {value: "VT", text: "VT"}, {value: "PLIO", text: "PLIO"}, {value: "CO", text: "CO"}, {value: "NIDM-RESULTS", text: "NIDM-RESULTS"}, {value: "FLYGLYCODB", text: "FLYGLYCODB"}, {value: "CMF", text: "CMF"}, {value: "NEOMARK3", text: "NEOMARK3"}, {value: "CLASSY-FIRE", text: "CLASSY-FIRE"}, {value: "INIKEEPO", text: "INIKEEPO"}, {value: "MDCO", text: "MDCO"}, {value: "IDOBRU", text: "IDOBRU"}, {value: "MCBCC", text: "MCBCC"}, {value: "DDPHENO", text: "DDPHENO"}, {value: "FO", text: "FO"}, {value: "DIMASFAN", text: "DIMASFAN"}, {value: "ODNAE", text: "ODNAE"}, {value: "KOINHOKI", text: "KOINHOKI"}, {value: "ONTOMA", text: "ONTOMA"}, {value: "FAST-EVENT", text: "FAST-EVENT"}, {value: "BIBLIOTEK-O", text: "BIBLIOTEK-O"}, {value: "EMAP", text: "EMAP"}, {value: "AS", text: "AS"}, {value: "STUFF", text: "STUFF"}, {value: "SCDO", text: "SCDO"}, {value: "NEUDIGS", text: "NEUDIGS"}, {value: "PMO", text: "PMO"}, {value: "COPDO", text: "COPDO"}, {value: "CMPO", text: "CMPO"}, {value: "ONSTR", text: "ONSTR"}, {value: "DCMITYPE", text: "DCMITYPE"}, {value: "MERA", text: "MERA"}, {value: "XCO", text: "XCO"}, {value: "SBOL", text: "SBOL"}, {value: "NEMO", text: "NEMO"}, {value: "NEOMARK4", text: "NEOMARK4"}, {value: "NIGO", text: "NIGO"}, {value: "REPO", text: "REPO"}, {value: "GBOL", text: "GBOL"}, {value: "DCT", text: "DCT"}, {value: "APATREATMENT", text: "APATREATMENT"}, {value: "BSAO", text: "BSAO"}, {value: "VSO", text: "VSO"}, {value: "EUPATH", text: "EUPATH"}, {value: "BIBFRAME", text: "BIBFRAME"}, {value: "MONO", text: "MONO"}, {value: "RAO", text: "RAO"}, {value: "MINERAL", text: "MINERAL"}, {value: "INO", text: "INO"}, {value: "DCTERMS", text: "DCTERMS"}, {value: "PROCESS", text: "PROCESS"}, {value: "GENEPIO", text: "GENEPIO"}, {value: "BIM", text: "BIM"}, {value: "TDWGSPEC", text: "TDWGSPEC"}, {value: "ATO", text: "ATO"}, {value: "PLANA", text: "PLANA"}, {value: "ISO19115CI", text: "ISO19115CI"}, {value: "MIXS", text: "MIXS"}, {value: "MFO", text: "MFO"}, {value: "PGXO", text: "PGXO"}, {value: "PANDA", text: "PANDA"}, {value: "ELIG", text: "ELIG"}, {value: "OGG-MM", text: "OGG-MM"}, {value: "PTS", text: "PTS"}, {value: "CNO_ACRONYM", text: "CNO_ACRONYM"}, {value: "APATANDT", text: "APATANDT"}, {value: "LEGALAPA", text: "LEGALAPA"}, {value: "APAOCUEMPLOY", text: "APAOCUEMPLOY"}, {value: "EHDAA2", text: "EHDAA2"}, {value: "PIERO", text: "PIERO"}, {value: "MATRROCKIGNEOUS", text: "MATRROCKIGNEOUS"}, {value: "VRACORE", text: "VRACORE"}, {value: "RETO", text: "RETO"}, {value: "LBO", text: "LBO"}, {value: "GEO", text: "GEO"}, {value: "KISAO", text: "KISAO"}, {value: "PVONTO", text: "PVONTO"}, {value: "CTX", text: "CTX"}, {value: "TIGER", text: "TIGER"}, {value: "RXNO", text: "RXNO"}, {value: "ISO19115SRS", text: "ISO19115SRS"}, {value: "MIRO", text: "MIRO"}, {value: "GRO-CPD", text: "GRO-CPD"}, {value: "TM-MER", text: "TM-MER"}, {value: "NIC", text: "NIC"}, {value: "OF", text: "OF"}, {value: "CVDO", text: "CVDO"}, {value: "GAYAA", text: "GAYAA"}, {value: "GMO", text: "GMO"}, {value: "COMODI", text: "COMODI"}, {value: "ISO19115ID", text: "ISO19115ID"}, {value: "FISHO", text: "FISHO"}, {value: "DIAGONT", text: "DIAGONT"}, {value: "ACRONYM", text: "ACRONYM"}, {value: "OGROUP", text: "OGROUP"}, {value: "SNPO", text: "SNPO"}, {value: "PPO", text: "PPO"}, {value: "PORO", text: "PORO"}, {value: "CBO", text: "CBO"}, {value: "NMOSP", text: "NMOSP"}, {value: "CEI_10", text: "CEI_10"}, {value: "TEDDY", text: "TEDDY"}, {value: "MINI-FAST-1", text: "MINI-FAST-1"}, {value: "EXO", text: "EXO"}, {value: "EPO", text: "EPO"}, {value: "CARELEX", text: "CARELEX"}, {value: "HPIO", text: "HPIO"}, {value: "KIOSASLIQQ", text: "KIOSASLIQQ"}, {value: "MIM", text: "MIM"}, {value: "RNPRIO", text: "RNPRIO"}, {value: "NIFCELL", text: "NIFCELL"}, {value: "GPML", text: "GPML"}, {value: "CHEMBIO", text: "CHEMBIO"}, {value: "SCIO", text: "SCIO"}, {value: "PXO", text: "PXO"}, {value: "OBI_BCGO", text: "OBI_BCGO"}, {value: "SP", text: "SP"}, {value: "ECP", text: "ECP"}, {value: "INVERSEROLES", text: "INVERSEROLES"}, {value: "ZECO", text: "ZECO"}, {value: "WB-LS", text: "WB-LS"}, {value: "ISO-15926-2_2003", text: "ISO-15926-2_2003"}, {value: "DCMI", text: "DCMI"}, {value: "DCO", text: "DCO"}, {value: "PROPREO", text: "PROPREO"}, {value: "HOM", text: "HOM"}, {value: "OOEVV", text: "OOEVV"}, {value: "ESFO", text: "ESFO"}, {value: "KONTES", text: "KONTES"}, {value: "RBMS", text: "RBMS"}, {value: "GO-EXT", text: "GO-EXT"}, {value: "ITEMAS", text: "ITEMAS"}, {value: "QIBO", text: "QIBO"}, {value: "MMUSDV", text: "MMUSDV"}, {value: "GCO", text: "GCO"}, {value: "APANEUROCLUSTER", text: "APANEUROCLUSTER"}, {value: "OMP", text: "OMP"}, {value: "MHC", text: "MHC"}, {value: "DLORO", text: "DLORO"}, {value: "HSAPDV", text: "HSAPDV"}, {value: "ONL-MSA", text: "ONL-MSA"}, {value: "BOF", text: "BOF"}, {value: "RDA-CONTENT", text: "RDA-CONTENT"}, {value: "ALLERGYDETECTOR", text: "ALLERGYDETECTOR"}, {value: "INSECTH", text: "INSECTH"}, {value: "OCVDAE", text: "OCVDAE"}, {value: "PHENX", text: "PHENX"}, {value: "ISO19115DTC", text: "ISO19115DTC"}, {value: "PEO", text: "PEO"}],
+		items: defaultontologies.split(','),
+		plugins: ['remove_button'],
+	    delimiter: ',',
+	    persist: false,
+	    create: function(input) {
+	        return {
+	            value: input,
+	            text: input
+	        }
+	    }
+	});
+	var ontology_ids_selector = $select[0].selectize;
 }
-else if(ontologyvalues!="")
-{
-
-defaultontologies=ontologyvalues;
-
-}
-	
-	else{}
-
-//$.noConflict();
-
-//(function($){
-    // original code here, with $ being a jQuery reference
-    // (but only within this code block)
-	s.src = chrome.extension.getURL('cod_complete.js');
-
-//})(jQuery);
-
-// TODO: add "script.js" to web_accessible_resources in manifest.json
-//s.src = chrome.extension.getURL('form_complete.js');
-//s.src = chrome.extension.getURL('crossdomain_autocomplete.js');
-//s.src = chrome.extension.getURL('jquery-1.11.2.min.js');
-//s.src = chrome.extension.getURL('jquery-migrate-1.2.1.min.js');
-s.onload = function() {
-    this.remove();
-};
-(document.head || document.documentElement). appendChild(s);
-
- var style = document.createElement('link');
-style.rel = 'stylesheet';
-style.type = 'text/css';
-style.href = chrome.extension.getURL('jquery.autocomplete.css');
-(document.head||document.documentElement).appendChild(style);
-//if(addNewJS.firstChild) addNewJS.insertBefore(s,addNewJS.firstChild);
-//else addNewJS.appendChild(s);
-
-//var d = document.getElementsByTagName("input")[0];
-//d.className += "bp_form_complete-all-name";
-
-//var d;
-//var e= document.querySelectorAll("input[type=text],input[id=fv_0]");
-var d= document.querySelectorAll("input[type=text],input[id=fv_0],input");
-
-//if()
-for (var i = 0; i < d.length; i++) {
-	  d[i].className = "bp_form_complete-"+defaultontologies+"-name";
-
-   // d[i].className = "bp_form_complete-NCBITAXON,DOID,GO,OBI,PR,IDO,CL-name";
-	//d[i].setAttribute("data-bp_include_definitions", "true");
-	d[i].style.backgroundColor="#f9f9d2";
-	//d[i].data-bp_include_definitions="true";
-	//d[i].innerHTML="New cell";
-	//document.getElementsByClassName("ac_results").style.backgroundColor="yellow"
-
-}
-//document.getElementsByTagName("input")[0].style.backgroundColor="yellow"
-//document.getElementsByTagName("form").style.backgroundColor="yellow"
-//<div class="ac_results" style="position: absolute; width: 650px; top: 27px; left: 82px; display: none;"></div>
-//document.getElementsByClassName("ac_results").style.backgroundColor="yellow"
-
-document.getElementsByTagName("body").style.backgroundColor="green"
-
-   // <input type="text" class="bg-info" size="70"  style="border:none" id="a_bioportal_full_id" disabled>    

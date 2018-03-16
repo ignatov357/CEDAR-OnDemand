@@ -2,7 +2,11 @@
 chrome.browserAction.onClicked.addListener(function (tab) {
 	// for the current tab, inject the "inject.js" file & execute it
 	chrome.tabs.executeScript(tab.ib, {
-		file: 'cod.js'
+		file: 'load_libraries.js'
+	}, function() {
+		chrome.tabs.executeScript(tab.ib, {
+			file: 'cod.js'
+		});
 	});
 });
 //chrome.browserAction.setBadgeBackgroundColor({ color: [225, 0, 0, 0] });
