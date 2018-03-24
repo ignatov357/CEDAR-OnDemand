@@ -17,6 +17,7 @@
    "jquery.autocomplete.css",
    "selectize.default.css",
    "tingle.css",
+   "style.css",
 	 "cod_complete.js"
   ],
   "manifest_version": 2
