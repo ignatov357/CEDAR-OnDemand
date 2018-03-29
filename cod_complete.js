@@ -302,7 +302,7 @@ function formComplete_setup_functions() {
           maxItemsToShow: 7,
           width: result_width,
           onItemSelect: bpFormSelect,
-       footer: '<div style="background-color: white; color: blck; font-size: 8pt; font-family: Verdana; padding: .8em .5em .3em;"><a style="color: red;" href="https://medicine.yale.edu/lab/kleinstein/software/"><b>CEDAR OnDemand</b></a> suggests metadata based on BioPortal ontologies.</div>',
+          //footer: '<div style="background-color: white; color: blck; font-size: 8pt; font-family: Verdana; padding: .8em .5em .3em;"><a style="color: red;" href="https://medicine.yale.edu/lab/kleinstein/software/"><b>CEDAR OnDemand</b></a> suggests metadata based on BioPortal ontologies.</div>',
           formatItem: formComplete_formatItem
       }
     );
