@@ -42,22 +42,16 @@ function open_and_handle_selector_popup() {
 			if(ontology_ids_selector.getValue() == '') { // If no ontologies selected, then doing nothing
 				return false;
 			} else {
-				// Saving selected ontologies on the page and storing them in variable
-				var defaultOntologies = ontology_ids_selector.getValue();
-				if(document.querySelectorAll('head meta[name=cedarOnDemandExtension_OntologyIds]').length == 0) {
-					var meta = document.createElement('meta');
-					meta.name = "cedarOnDemandExtension_OntologyIds";
-					meta.content = defaultOntologies;
-					document.getElementsByTagName('head')[0].appendChild(meta);
-				} else {
-					document.querySelector('head meta[name=cedarOnDemandExtension_OntologyIds]').content = defaultOntologies;
-				}
+				// Storing selected ontologies in variable
+				defaultOntologies = ontology_ids_selector.getValue().toString();
 			}
 
-			if(!useRecommenderSearch) {
-				window.ontologiesSearch = new Sifter(allOntologies); // Local ontologies search library object creation
-			}
 			if(useRecommenderSearch) {
+				// Initialize variable for caching bioportal responses (if not initialized)
+				if(typeof bioPortalRecommenderCache === "undefined") {
+					bioPortalRecommenderCache = {};
+				}
+
 				// Creating (but not showing) search loader popup
 	       		var loader = new tingle.modal({
 				    closeMethods: [],
@@ -65,8 +59,17 @@ function open_and_handle_selector_popup() {
 				});
 
 				// Setting search loader popup content
-				loader.setContent('<div id="preloader"><div id="loader"></div></div><br><br>Setting up the relevant ontologies for every input field.<br>Please, wait!');
-	       	}
+				if(jQuery.isEmptyObject(bioPortalRecommenderCache)) {
+					loader.setContent('<div id="preloader"><div id="loader"></div></div><br><br>Setting up the relevant ontologies for every input field.<br>It can take some time for the first run on the page. Please, wait!');
+				} else {
+					loader.setContent('<div id="preloader"><div id="loader"></div></div><br><br>Setting up the relevant ontologies for every input field.<br>Please, wait!');
+				}
+	       	} else {
+	       		// Local ontologies search library object creation (if not created)
+				if(typeof ontologiesSearch === "undefined") {
+					ontologiesSearch = new Sifter(allOntologies);
+				}
+			}
 	       	
 			var searchPerformed = false;
 			$('input:text:not(#ontology_ids-selectized)').each(function() { // Iterating input fields
@@ -92,7 +95,7 @@ function open_and_handle_selector_popup() {
 						if($element.attr('class') != undefined) {
 							$element.attr('class', $element.attr('class').replace(/[ ]*bp_form_complete-[a-zA-Z0-9_,]*-name/g, ''));
 						}
-						$element.addClass("bp_form_complete-" + defaultOntologies.join(',') + "-name");
+						$element.addClass("bp_form_complete-" + defaultOntologiesArray.join(',') + "-name");
 					}
 					//$element.attr("data-bp_include_definitions", "true");
 					$element.css('background-color', '#f9f9d2');
@@ -157,15 +160,14 @@ function open_and_handle_selector_popup() {
 		// Opening ontologies selector popup
 		modal.open();
 
-		// Getting user selected (or defualt) otology ids
-		defaultOntologies = 'NCBITAXON,DOID,GO,OBI,PR,IDO,CL';
-		if(document.querySelectorAll('head meta[name=cedarOnDemandExtension_OntologyIds]').length > 0) {
-			defaultOntologies = document.querySelector('head meta[name=cedarOnDemandExtension_OntologyIds]').content;
+		// Getting user selected (or defualt) ontology ids
+		if(typeof defaultOntologies === "undefined") {
+			defaultOntologies = 'NCBITAXON,DOID,GO,OBI,PR,IDO,CL';
 		}
 		// Showing ontologies dropdown list
 		var $select = jQuery('select#ontology_ids').selectize({
 			options: allOntologies,
-			items: defaultOntologies.split(','),
+			items: defaultOntologies.toString().split(','),
 			plugins: ['remove_button'],
 		    delimiter: ',',
 		    persist: false,
@@ -181,37 +183,50 @@ function open_and_handle_selector_popup() {
    Executes callback function, passing an array of ontology IDs 
 */
 function searchOntologiesUsingBioportal(text, callback) {
+	// Check if callback is given
+	if(typeof callback !== "function") {
+		return;
+	}
+
 	// Initializing counter for active requests to the Bioportal (if not initialized)
 	if(typeof activeRequestsToBioPortal != "number") {
 		activeRequestsToBioPortal = 0;
 	}
-	// Performing the request
-	$.ajax({
-		url: 'https://data.bioontology.org/recommender?input=' + text + '&include=ontologies&display_links=false&display_context=false&apikey=89f4c54e-aee8-4af5-95b6-dd7c608f057f', 
-	    dataType: 'JSON',
-	    beforeSend: function() {
-	    	activeRequestsToBioPortal++;
-	    },
-		success: function(data) {
-			// Converting retrieved data to an array of ontology ids
-	        for(i = 0; i < data.length; i++) {
-				data[i] = data[i]['ontologies'][0]['acronym'];
-			}
-			// Executing a callback function, passing an array of ontology IDs
-			if(typeof callback == "function") {
+	if(typeof bioPortalRecommenderCache[text] === "undefined") {
+		// Performing the request
+		$.ajax({
+			url: 'https://data.bioontology.org/recommender?input=' + text + '&include=ontologies&display_links=false&display_context=false&apikey=89f4c54e-aee8-4af5-95b6-dd7c608f057f', 
+		    dataType: 'JSON',
+		    beforeSend: function() {
+		    	activeRequestsToBioPortal++;
+		    },
+			success: function(data) {
+				// Converting retrieved data to an array of ontology ids
+		        for(i = 0; i < data.length; i++) {
+					data[i] = data[i]['ontologies'][0]['acronym'];
+				}
+
+				// Caching the response data
+				bioPortalRecommenderCache[text] = data;
+
+				// Executing a callback function, passing an array of ontology IDs
 				callback(data);
-			}
-	    },
-	    error: function() {
-	    	// Executing callback function, passing an empty array
-			if(typeof callback == "function") {
+		    },
+		    error: function() {
+		    	// Executing callback function, passing an empty array
 				callback([]);
-			}
-	    },
-	    complete: function() {
-	    	activeRequestsToBioPortal--;
-	    }
-	});
+		    },
+		    complete: function() {
+		    	activeRequestsToBioPortal--;
+		    }
+		});
+	} else {
+		activeRequestsToBioPortal++;
+		setTimeout(function() {
+			callback(bioPortalRecommenderCache[text]);
+			activeRequestsToBioPortal--;
+		}, 250);
+	}
 }
 
 /**
@@ -221,7 +236,7 @@ function searchOntologiesUsingBioportal(text, callback) {
 function searchOntologies(text, callback = null) {
 	// Searching and storing results into a variable
 	var result = [];
-	window.ontologiesSearch.search(text, {fields: ['value', 'text']})['items'].forEach(function(item) {
+	ontologiesSearch.search(text, {fields: ['value', 'text']})['items'].forEach(function(item) {
 		result.push(allOntologies[item['id']]['value']);
 	});
 	if(typeof callback == "function") {
@@ -232,6 +247,8 @@ function searchOntologies(text, callback = null) {
 		return result;
 	}
 }
+
+//console.log(defaultOntologies);
 
 if(!isExtensionPopupActive()) { // Checks whether extension popup is active to avoid 2 popups at the same time
 	if(typeof allOntologies === 'undefined') { // If first run on the page (variable, storing all the ontologies, is not defined)
@@ -266,17 +283,17 @@ if(!isExtensionPopupActive()) { // Checks whether extension popup is active to a
 				});
 				// Saving all ontologies on the page and storing into the variable
 				allOntologies = [];
-				allOntologiesString = '';
-				allOntologiesString += '[';
+				/*allOntologiesString = '';
+				allOntologiesString += '[';*/
 				for(i = 0; i < data.length; i++) {
 					allOntologies.push({value: data[i]['acronym'], text: data[i]['name']});
-					allOntologiesString += '{value: "' + data[i]['acronym'] + '", text: "' + data[i]['name'] + '"}';
+					/*allOntologiesString += '{value: "' + data[i]['acronym'] + '", text: "' + data[i]['name'] + '"}';
 					if(i < (data.length - 1)) {
 						allOntologiesString += ',';
-					}
+					}*/
 		        }
-		        allOntologiesString += ']';
-				executeScript("allOntologies = " + allOntologiesString + ";");
+		        /*allOntologiesString += ']';
+				executeScript("allOntologies = " + allOntologiesString + ";");*/
 
 				// Closing first run loader popup
 			    loader.close();
