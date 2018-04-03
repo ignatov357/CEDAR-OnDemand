@@ -97,7 +97,7 @@ function open_and_handle_selector_popup() {
 						}
 						$element.addClass("bp_form_complete-" + defaultOntologiesArray.join(',') + "-name");
 					}
-					//$element.attr("data-bp_include_definitions", "true");
+					$element.attr("data-bp_include_definitions", "true");
 					$element.css('background-color', '#f9f9d2');
 
 					// If search is performed using recommender and it's the last input field, then closing popup and executing autocomplete code

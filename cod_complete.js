@@ -33,18 +33,17 @@ if (typeof jQuery == 'undefined') {
   jq = document.createElement('script');
   jqMigrate = document.createElement('script');
   jq.type = jqMigrate.type = "text/javascript";
-  
-  jq.src = "https://code.jquery.com/jquery-1.11.2.min.js";
-  jqMigrate.src = "https://code.jquery.com/jquery-migrate-1.2.1.min.js";
+  jq.src = "//code.jquery.com/jquery-1.11.2.min.js";
+  jqMigrate.src = "//code.jquery.com/jquery-migrate-1.2.1.min.js";
   jq.onload = function() {
     jqMigrate.onload = bpFormCompleteOnLoad;
     scriptLoc.appendChild(jqMigrate);
   }
   scriptLoc.appendChild(jq);
-} else if (typeof $.fn !== "undefined" && bpMinVersion("1.9", $.fn.jQuery)) {
+} else if (typeof $.fn !== "undefined" && bpMinVersion("1.9", $.fn.jquery)) {
   var jqMigrate = document.createElement('script');
   jqMigrate.type = "text/javascript";
-  jqMigrate.src = "https://code.jquery.com/jquery-migrate-1.2.1.min.js";
+  jqMigrate.src = "//code.jquery.com/jquery-migrate-1.2.1.min.js";
   jqMigrate.onload = bpFormCompleteOnLoad;
   document.getElementsByTagName('head')[0].appendChild(jqMigrate);
 } else {
@@ -82,21 +81,22 @@ BP_SEARCH_SERVER = determineHTTPS(BP_SEARCH_SERVER);
 
 var formComplete_searchBoxID = "BP_search_box",
     formComplete_searchBoxSelector = "#" + formComplete_searchBoxID;
+
 function bpFormCompleteOnLoad() {
   jQuery(document).ready(function(){
     // Install any CSS we need (check to make sure it hasn't been loaded)
-    if (jQuery('link[href$="./jquery.autocomplete.css"]')) {
+    if (jQuery('link[href$="' + BP_SEARCH_SERVER + '/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"]')) {
       jQuery("head").append("<link>");
       css = jQuery("head").children(":last");
       css.attr({
         rel:  "stylesheet",
         type: "text/css",
-        href: determineHTTPS("http://bioportal.bioontology.org") + "/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"
+        href: BP_SEARCH_SERVER + "/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"
       });
     }
 
     // Grab the specific scripts we need and fires the start event
-    jQuery.getScript(determineHTTPS("http://bioportal.bioontology.org") + "/javascripts/JqueryPlugins/autocomplete/crossdomain_autocomplete.js",function(){
+    jQuery.getScript(BP_SEARCH_SERVER + "/javascripts/JqueryPlugins/autocomplete/crossdomain_autocomplete.js", function(){
       formComplete_setup_functions();
     });
   });
@@ -177,13 +177,11 @@ function formComplete_formatItem(row) {
     var result_ont_version = row[3],
         result_uri = row[4];
     if (ontology_id !== "") {
-    
-       if (BP_include_definitions) {
+        if (BP_include_definitions) {
             resultDiv.append(definitionDiv(result_ont_version, result_uri));
         }
-    //var="<span style='color:#ff0000;'>Look at BioPortal</span>";
+        resultDiv.append(resultClassDiv);
         resultDiv.append(resultClassDiv,"<span style='color:#ff0000;'>Ontology ID: </span>",result_ont_version); //Added ontology id and version in the list -ahmad chan
-    //,"<span style='color:#ff0000;'>BioPortal URI: </span>", result_uri)   
         resultDiv.append(resultTypeSpan.attr("style", "overflow: hidden; float: none;"));
     } else {
         resultDiv.append(resultClassDiv);
@@ -197,37 +195,18 @@ function formComplete_formatItem(row) {
         resultOntDiv.attr("style", "overflow: hidden;");
         resultOntDiv.html(truncateText(resultOnt, 30));
         resultDiv.append(resultOntDiv);
-    
-    
-    /////
-    
-  
-    
-    
-    
-    
     }
     return obsolete_prefix + resultDiv.html() + obsolete_suffix;
 }
 
 function definitionDiv(ont, concept) {
-    console.log(concept);
     var definitionAjax = jQuery("<a>");
     definitionAjax.addClass("get_definition_via_ajax");
-  //http://bioportal.bioontology.org/ajax/json_class?callback=?&ontologyid=CL&conceptid=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FPR_000018263
-  //alert("http://bioportal.bioontology.org/ajax/json_class?callback=?&ontologyid=" + ont + "&conceptid=" + encodeURIComponent(concept));
-    definitionAjax.attr("http://bioportal.bioontology.org/ajax/json_class?callback=?&ontologyid=" + ont + "&conceptid=" + encodeURIComponent(concept));
+    definitionAjax.attr("href", "https://data.bioontology.org/ontologies/" + ont + "/classes/" + encodeURIComponent(concept) + "?include=definition&display_context=false&display_links=false&apikey=89f4c54e-aee8-4af5-95b6-dd7c608f057f");
     var definitionDiv = jQuery("<div>");
     definitionDiv.addClass('result_definition');
     definitionDiv.text("retreiving definitions...");
-  //if(definitionAjax="")
-  //
-  //  definitionDiv.append("No defination found");
-
-  //}
-    // else{ 
-     definitionDiv.append(definitionAjax);
-     //}
+    definitionDiv.append(definitionAjax);
     return definitionDiv;
 }
 
@@ -299,7 +278,7 @@ function formComplete_setup_functions() {
           lineSeparator: "~!~",
           matchSubset: 0,
           minChars: 3,
-          maxItemsToShow: 7,
+          maxItemsToShow: 10,
           width: result_width,
           onItemSelect: bpFormSelect,
           //footer: '<div style="background-color: white; color: blck; font-size: 8pt; font-family: Verdana; padding: .8em .5em .3em;"><a style="color: red;" href="https://medicine.yale.edu/lab/kleinstein/software/"><b>CEDAR OnDemand</b></a> suggests metadata based on BioPortal ontologies.</div>',
@@ -352,10 +331,14 @@ function getWidgetAjaxContent() {
     var def_link = $(this);
     if (typeof def_link.attr("getting_content") === 'undefined') {
       def_link.attr("getting_content", true);
-      $.getJSON(def_link.attr("href"), function(data){
-        console.log(data);
-        var definition = (typeof data.definition === 'undefined') ? "" : data.definition.join(" ");
-        def_link.parent().html(truncateText(decodeURIComponent(definition.replace(/\+/g, " "))));
+      $.ajax({
+        url: def_link.attr("href"), 
+        dataType: 'JSON',
+        cache: true,
+        success: function(data) {
+          var definition = (typeof data.definition === 'undefined') ? "" : data.definition.join(" ");
+          def_link.parent().html(truncateText(decodeURIComponent(definition.replace(/\+/g, " "))));
+        }
       });
     }
   });
