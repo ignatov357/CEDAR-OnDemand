@@ -7,8 +7,11 @@
       // Create a link to self
       var me = this;
 
+      if($(input).attr("autocomplete") == "on") {
+        return;
+      }
       // Create jQuery object for input element
-      var $input = $(input).attr("autocomplete", "off");
+      var $input = $(input).attr("autocomplete", "on");
 
       // Apply inputClass if necessary
       if (options.inputClass) $input.addClass(options.inputClass);
@@ -101,13 +104,14 @@
           default:
             active = -1;
             if (timeout) clearTimeout(timeout);
-            timeout = setTimeout(function(){onChange();}, options.delay);
+            timeout = setTimeout(function(){ onChange(); }, options.delay);
             break;
         }
       })
       .focus(function(){
         // track whether the field has focus, we shouldn't process any results if the field no longer has focus
         hasFocus = true;
+        hideResults();
       })
       .blur(function() {
         // track whether the field has focus
@@ -354,6 +358,7 @@
 
       function makeUrl(q) {
         var url = options.url + "?q=" + encodeURI(q);
+        options.extraParams.ontologies = jQuery(input).attr('data-ontologies');
         for (var i in options.extraParams) {
           url += "&" + i + "=" + encodeURI(options.extraParams[i]);
         }

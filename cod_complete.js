@@ -85,7 +85,7 @@ var formComplete_searchBoxID = "BP_search_box",
 function bpFormCompleteOnLoad() {
   jQuery(document).ready(function(){
     // Install any CSS we need (check to make sure it hasn't been loaded)
-    if (jQuery('link[href$="' + BP_SEARCH_SERVER + '/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"]')) {
+    if (jQuery('link[href$="' + BP_SEARCH_SERVER + '/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"]').length == 0) {
       jQuery("head").append("<link>");
       css = jQuery("head").children(":last");
       css.attr({
@@ -96,9 +96,11 @@ function bpFormCompleteOnLoad() {
     }
 
     // Grab the specific scripts we need and fires the start event
-    jQuery.getScript(BP_SEARCH_SERVER + "/javascripts/JqueryPlugins/autocomplete/crossdomain_autocomplete.js", function(){
-      formComplete_setup_functions();
-    });
+    //if(typeof jQuery.bioportal_autocomplete === "undefined") {
+      //jQuery.getScript(BP_SEARCH_SERVER + "/javascripts/JqueryPlugins/autocomplete/crossdomain_autocomplete.js", function(){
+        formComplete_setup_functions();
+      //});
+    //}
   });
 }
 
@@ -237,7 +239,7 @@ function formComplete_setup_functions() {
       BP_objecttypes = "";
     }
 
-    // Find the 'bp_form_complete-{ontologyId,...}-{property}' values
+/*  // Find the 'bp_form_complete-{ontologyId,...}-{property}' values
     // in the class attribute(s)
     jQuery(classes).each(function() {
       if (this.indexOf("bp_form_complete") === 0) {
@@ -250,6 +252,7 @@ function formComplete_setup_functions() {
     if (ontology_id == "all") { // Doesn't handle CSV?
       ontology_id = "";
     }
+*/
 
     var extra_params = {
       input: this,
@@ -257,7 +260,7 @@ function formComplete_setup_functions() {
       subtreerootconceptid: encodeURIComponent(BP_search_branch),
       objecttypes: BP_objecttypes,
       id: BP_ONTOLOGIES, // not 'ontology_id', see below...
-      ontologies: ontology_id
+      //ontologies: ontology_id
     };
 
     var result_width = 450;

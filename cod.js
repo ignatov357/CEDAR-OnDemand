@@ -9,6 +9,18 @@ function executeScript(script) {
 }
 
 /**
+    Loads script from the given url and executes it
+*/
+function loadScript(url) {
+	var scriptTag = document.createElement('script');
+	scriptTag.src = chrome.extension.getURL('cod_complete.js');
+	scriptTag.onload = function() {
+		this.remove();
+	};
+	(document.head || document.documentElement).appendChild(scriptTag);
+}
+
+/**
    Checks whether extension popup is active
 
    @return true if popup active, false otherwise
@@ -36,7 +48,7 @@ function open_and_handle_selector_popup() {
 		});
 
 		// Setting ontologies selector popup content
-		modal.setContent('<p style="margin: 0px;">You can add/remove BioPortal Ontologies IDs.</p><p style="margin-top: 0px;">Note! You can add/remove ontologies later on anytime.</p><select id="ontology_ids" multiple></select>');
+		modal.setContent('<p style="margin: 0px !important;">You can add/remove BioPortal Ontologies IDs.</p><p style="margin: 0px !important;">Note! You can add/remove ontologies later on anytime.</p><br><select id="ontology_ids" multiple></select>');
 		// Adding footer button and event handler for that
 		modal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary tingle-btn--pull-left', function() {
 			if(ontology_ids_selector.getValue() == '') { // If no ontologies selected, then doing nothing
@@ -90,12 +102,14 @@ function open_and_handle_selector_popup() {
 						if($element.attr('class') != undefined) {
 							$element.attr('class', $element.attr('class').replace(/[ ]*bp_form_complete-[a-zA-Z0-9_,]*-name/g, ''));
 						}
-						$element.addClass("bp_form_complete-" + qualifiedOntologies.join(',') + "-name");
+						$element.attr("data-ontologies", qualifiedOntologies.join(',')); // Ontologies for input field should be set this way
+						$element.addClass("bp_form_complete-" + qualifiedOntologies.join(',') + "-name"); // Saved for back support
 					} else {
 						if($element.attr('class') != undefined) {
 							$element.attr('class', $element.attr('class').replace(/[ ]*bp_form_complete-[a-zA-Z0-9_,]*-name/g, ''));
 						}
-						$element.addClass("bp_form_complete-" + defaultOntologiesArray.join(',') + "-name");
+						$element.attr("data-ontologies", defaultOntologiesArray.join(',')); // Ontologies for input fields should be set this way
+						$element.addClass("bp_form_complete-" + defaultOntologiesArray.join(',') + "-name"); // Saved for back support
 					}
 					$element.attr("data-bp_include_definitions", "true");
 					$element.css('background-color', '#f9f9d2');
@@ -105,12 +119,7 @@ function open_and_handle_selector_popup() {
 					    loader.close();
 						document.querySelector('.tingle-modal.handling_search_popup').remove();
 
-						var s = document.createElement('script');
-						s.src = chrome.extension.getURL('cod_complete.js');
-						s.onload = function() {
-						    this.remove();
-						};
-						(document.head || document.documentElement).appendChild(s);
+						loadScript(chrome.extension.getURL('cod_complete.js'));
 					}
 				}
 				// Running search for input field or assigning all selected ontologies (if there is nothing to search by)
@@ -138,12 +147,7 @@ function open_and_handle_selector_popup() {
 		    	loader.open();
 		    } else {
 		    	// Executing autocomplete code
-				var s = document.createElement('script');
-				s.src = chrome.extension.getURL('cod_complete.js');
-				s.onload = function() {
-				    this.remove();
-				};
-				(document.head || document.documentElement).appendChild(s);
+				loadScript(chrome.extension.getURL('cod_complete.js'));
 		    }
 
 		    // Closing ontologies selector popup
@@ -197,6 +201,7 @@ function searchOntologiesUsingBioportal(text, callback) {
 		$.ajax({
 			url: 'https://data.bioontology.org/recommender?input=' + text + '&include=ontologies&display_links=false&display_context=false&apikey=89f4c54e-aee8-4af5-95b6-dd7c608f057f', 
 		    dataType: 'JSON',
+		    cache: true,
 		    beforeSend: function() {
 		    	activeRequestsToBioPortal++;
 		    },
@@ -248,8 +253,6 @@ function searchOntologies(text, callback = null) {
 	}
 }
 
-//console.log(defaultOntologies);
-
 if(!isExtensionPopupActive()) { // Checks whether extension popup is active to avoid 2 popups at the same time
 	if(typeof allOntologies === 'undefined') { // If first run on the page (variable, storing all the ontologies, is not defined)
 		// Creating (but not showing) first run loader popup
@@ -283,17 +286,9 @@ if(!isExtensionPopupActive()) { // Checks whether extension popup is active to a
 				});
 				// Saving all ontologies on the page and storing into the variable
 				allOntologies = [];
-				/*allOntologiesString = '';
-				allOntologiesString += '[';*/
 				for(i = 0; i < data.length; i++) {
 					allOntologies.push({value: data[i]['acronym'], text: data[i]['name']});
-					/*allOntologiesString += '{value: "' + data[i]['acronym'] + '", text: "' + data[i]['name'] + '"}';
-					if(i < (data.length - 1)) {
-						allOntologiesString += ',';
-					}*/
 		        }
-		        /*allOntologiesString += ']';
-				executeScript("allOntologies = " + allOntologiesString + ";");*/
 
 				// Closing first run loader popup
 			    loader.close();

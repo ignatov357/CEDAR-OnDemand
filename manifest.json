@@ -6,7 +6,7 @@
     "activeTab"
   ],
   "background": {
-    "scripts": ["cod_complete.js","background.js"],
+    "scripts": ["background.js"],
     "persistent": false
   },
   "browser_action": {
@@ -14,10 +14,10 @@
 	  "default_title": "CEDAR OnDemand"
   },
   "web_accessible_resources": [
-   "jquery.autocomplete.css",
    "selectize.default.css",
    "tingle.css",
    "style.css",
+   "crossdomain_autocomplete.js",
 	 "cod_complete.js"
   ],
   "manifest_version": 2
