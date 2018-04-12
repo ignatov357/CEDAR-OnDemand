@@ -58,9 +58,7 @@ if (typeof jQuery == 'undefined') {
 var BP_FORM_COMPLETE_LOADED = true;
 
 // Set the defaults if they haven't been set yet
-if (typeof BP_SEARCH_SERVER === 'undefined') {
-  var BP_SEARCH_SERVER = "http://bioportal.bioontology.org";
-}
+var BP_SEARCH_SERVER = "http://bioportal.bioontology.org";
 if (typeof BP_SITE === 'undefined') {
   var BP_SITE = "BioPortal";
 }
@@ -85,19 +83,19 @@ var formComplete_searchBoxID = "BP_search_box",
 function bpFormCompleteOnLoad() {
   jQuery(document).ready(function(){
     // Install any CSS we need (check to make sure it hasn't been loaded)
-    if (jQuery('link[href$="' + BP_SEARCH_SERVER + '/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"]').length == 0) {
+    if (jQuery('link[href$="' + determineHTTPS("http://bioportal.bioontology.org") + '/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"]').length == 0) {
       jQuery("head").append("<link>");
       css = jQuery("head").children(":last");
       css.attr({
         rel:  "stylesheet",
         type: "text/css",
-        href: BP_SEARCH_SERVER + "/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"
+        href: determineHTTPS("http://bioportal.bioontology.org") + "/javascripts/JqueryPlugins/autocomplete/jquery.autocomplete.css"
       });
     }
 
     // Grab the specific scripts we need and fires the start event
     //if(typeof jQuery.bioportal_autocomplete === "undefined") {
-      //jQuery.getScript(BP_SEARCH_SERVER + "/javascripts/JqueryPlugins/autocomplete/crossdomain_autocomplete.js", function(){
+      //jQuery.getScript(determineHTTPS("http://bioportal.bioontology.org") + "/javascripts/JqueryPlugins/autocomplete/crossdomain_autocomplete.js", function(){
         formComplete_setup_functions();
       //});
     //}
@@ -275,7 +273,7 @@ function formComplete_setup_functions() {
 
     // see "public/javascripts/JqueryPlugins/autocomplete/crossdomain_autocomplete.js"
     jQuery(this).bioportal_autocomplete(
-      BP_SEARCH_SERVER + "/search/json_search/",
+      determineHTTPS("http://bioportal.bioontology.org") + "/search/json_search/",
       {
           extraParams: extra_params,
           lineSeparator: "~!~",
@@ -330,11 +328,11 @@ function bpFormSelect(li) {
 // Poll for potential definitions returned with results
 function getWidgetAjaxContent() {
   // Look for anchors with a get_via_ajax class and replace the parent with the resulting ajax call
-  $(".get_definition_via_ajax").each(function(){
-    var def_link = $(this);
+  jQuery(".get_definition_via_ajax").each(function(){
+    var def_link = jQuery(this);
     if (typeof def_link.attr("getting_content") === 'undefined') {
       def_link.attr("getting_content", true);
-      $.ajax({
+      jQuery.ajax({
         url: def_link.attr("href"), 
         dataType: 'JSON',
         cache: true,
@@ -355,7 +353,7 @@ function truncateText(text, max_length) {
 
   var more = '...';
 
-  var content_length = $.trim(text).length;
+  var content_length = jQuery.trim(text).length;
   if (content_length <= max_length)
     return text;  // bail early if not overlong
 
@@ -369,7 +367,7 @@ function truncateText(text, max_length) {
 
   // Ensure HTML entities are encoded
   // http://debuggable.com/posts/encode-html-entities-with-jquery:480f4dd6-13cc-4ce9-8071-4710cbdd56cb
-  text_short = $('<div/>').text(text_short).html();
+  text_short = jQuery('<div/>').text(text_short).html();
 
   var other_text = text.slice(max_length, text.length);
 

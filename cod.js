@@ -84,9 +84,9 @@ function open_and_handle_selector_popup() {
 			}
 	       	
 			var searchPerformed = false;
-			$('input:text:not(#ontology_ids-selectized)').each(function() { // Iterating input fields
-		       	var $element = $(this); 
-	       		var $label = $("label[for='" + this.id + "']");
+			jQuery('input:text:not(#ontology_ids-selectized)').each(function() { // Iterating input fields
+		       	var $element = jQuery(this); 
+	       		var $label = jQuery("label[for='" + this.id + "']");
 
 	       		// Defining callback function
 	       		callback = function(recommenderOntologies) {
@@ -115,7 +115,7 @@ function open_and_handle_selector_popup() {
 					$element.css('background-color', '#f9f9d2');
 
 					// If search is performed using recommender and it's the last input field, then closing popup and executing autocomplete code
-					if(useRecommenderSearch && typeof activeRequestsToBioPortal == "number" && activeRequestsToBioPortal == 1) {
+					if(($label.length > 0 || $element.attr('aria-label')) != undefined && useRecommenderSearch && typeof activeRequestsToBioPortal == "number" && activeRequestsToBioPortal == 1) {
 					    loader.close();
 						document.querySelector('.tingle-modal.handling_search_popup').remove();
 
@@ -198,7 +198,7 @@ function searchOntologiesUsingBioportal(text, callback) {
 	}
 	if(typeof bioPortalRecommenderCache[text] === "undefined") {
 		// Performing the request
-		$.ajax({
+		jQuery.ajax({
 			url: 'https://data.bioontology.org/recommender?input=' + text + '&include=ontologies&display_links=false&display_context=false&apikey=89f4c54e-aee8-4af5-95b6-dd7c608f057f', 
 		    dataType: 'JSON',
 		    cache: true,
@@ -266,7 +266,7 @@ if(!isExtensionPopupActive()) { // Checks whether extension popup is active to a
 		loader.open();
 
 		// Performing request to retrieve all the ontologies
-		$.ajax({
+		jQuery.ajax({
 			url: 'https://data.bioontology.org/ontologies?include=name,acronym&display_links=false&display_context=false&apikey=89f4c54e-aee8-4af5-95b6-dd7c608f057f',
 			dataType: 'JSON',
 			success: function(data) {

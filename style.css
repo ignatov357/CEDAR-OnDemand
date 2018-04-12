@@ -1,4 +1,4 @@
-.tingle-modal.ontology_ids_selector_popup, .tingle-modal.handling_search_popup {
+.tingle-modal.ontology_ids_selector_popup, .tingle-modal.handling_search_popup, .tingle-modal.first_run_loader {
   /*font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif !important;*/
   font-size: 14px !important;
 }

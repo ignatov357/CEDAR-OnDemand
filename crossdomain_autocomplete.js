@@ -1,17 +1,17 @@
 // Generally we use jQuery as the keyword but some people
-// will use another framework which takes control of the $.
+// will use another framework which takes control of the jQuery.
 // To avoid re-writing this script we'll use a wrapper.
 (function($) {
-  $(function() {
+  jQuery(function() {
     jQuery.bioportal_autocomplete = function(input, options) {
       // Create a link to self
       var me = this;
 
-      if($(input).attr("autocomplete") == "on") {
+      if(jQuery(input).attr("autocomplete") == "on") {
         return;
       }
       // Create jQuery object for input element
-      var $input = $(input).attr("autocomplete", "on");
+      var $input = jQuery(input).attr("autocomplete", "on");
 
       // Apply inputClass if necessary
       if (options.inputClass) $input.addClass(options.inputClass);
@@ -19,12 +19,12 @@
       // Create results
       var results = document.createElement("div");
       // Create jQuery object for results
-      var $results = $(results);
+      var $results = jQuery(results);
       $results.hide().addClass(options.resultsClass).css("position", "absolute");
       if( options.width > 0 ) $results.css("width", options.width);
 
       // Add to body element
-      $("body").append(results);
+      jQuery("body").append(results);
 
       input.autocompleter = me;
 
@@ -138,7 +138,7 @@
 
       function moveSelect(step) {
 
-        var lis = $("li", results);
+        var lis = jQuery("li", results);
         if (!lis) return;
 
         active += step;
@@ -151,7 +151,7 @@
 
         lis.removeClass("ac_over");
 
-        $(lis[active]).addClass("ac_over");
+        jQuery(lis[active]).addClass("ac_over");
 
         // Weird behaviour in IE
         // if (lis[active] && lis[active].scrollIntoView) {
@@ -161,9 +161,9 @@
       };
 
       function selectCurrent() {
-        var li = $("li.ac_over", results)[0];
+        var li = jQuery("li.ac_over", results)[0];
         if (!li) {
-          var $li = $("li", results);
+          var $li = jQuery("li", results);
           if (options.selectOnly) {
             if ($li.length == 1) li = $li[0];
           } else if (options.selectFirst) {
@@ -184,14 +184,14 @@
           li.extra = [];
           li.selectValue = "";
         }
-        var v = $.trim(li.selectValue ? li.selectValue : li.innerHTML);
+        var v = jQuery.trim(li.selectValue ? li.selectValue : li.innerHTML);
         input.lastSelected = v;
         prev = v;
         $results.html("");
         $input.val(v);
         hideResultsNow();
         if (options.onItemSelect) setTimeout(function() { options.onItemSelect(li) }, 1);
-        setTimeout(function() { $(document).trigger("autocomplete_selected"); }, 2);
+        setTimeout(function() { jQuery(document).trigger("autocomplete_selected"); }, 2);
       };
 
       // selects a portion of the input string
@@ -273,7 +273,7 @@
           if( data.length == 0 )
             results.appendChild("<div style='padding: 5px; font-size: normal; font-style: oblique;'>No results found</div>")
 
-          if ($.browser.msie && $.browser.version < 9) {
+          if (jQuery.browser.msie && jQuery.browser.version < 9) {
             // we put a styled iframe behind the calendar so HTML SELECT elements don't show through
             $results.append(document.createElement('iframe'));
           }
@@ -293,7 +293,7 @@
         var parsed = [];
         var rows = data.split(options.lineSeparator);
         for (var i=0; i < rows.length; i++) {
-          var row = $.trim(rows[i]);
+          var row = jQuery.trim(rows[i]);
           if (row) {
             parsed[parsed.length] = row.split(options.cellSeparator);
           }
@@ -328,9 +328,9 @@
           }
           li.extra = extra;
           ul.appendChild(li);
-          $(li).hover(
-            function() { $("li", ul).removeClass("ac_over"); $(this).addClass("ac_over"); active = $("li", ul).indexOf($(this).get(0)); },
-            function() { $(this).removeClass("ac_over"); }
+          jQuery(li).hover(
+            function() { jQuery("li", ul).removeClass("ac_over"); jQuery(this).addClass("ac_over"); active = jQuery("li", ul).indexOf(jQuery(this).get(0)); },
+            function() { jQuery(this).removeClass("ac_over"); }
           ).click(function(e) { e.preventDefault(); e.stopPropagation(); selectItem(this) });
         }
         return ul;
@@ -344,7 +344,7 @@
           receiveData(q, data);
         // if an AJAX url has been supplied, try loading the data now
         } else if( (typeof options.url == "string") && (options.url.length > 0) ){
-          $.getJSON(makeUrl(q)+"&response=json&callback=?", function(data) {
+          jQuery.getJSON(makeUrl(q)+"&response=json&callback=?", function(data) {
     //                alert(data.data)
             data = parseData(data.data);
             addToCache(q, data);
@@ -419,7 +419,7 @@
         if (data) {
           findValueCallback(q, data);
         } else if( (typeof options.url == "string") && (options.url.length > 0) ){
-          $.get(makeUrl(q), function(data) {
+          jQuery.get(makeUrl(q), function(data) {
             data = parseData(data)
             addToCache(q, data);
             findValueCallback(q, data);
