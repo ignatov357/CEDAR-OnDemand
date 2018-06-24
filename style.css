@@ -196,3 +196,6 @@
     align-items: center;
     justify-content: center;
 }
+.selectize-dropdown .option[data-value=all_ontologies] {
+    font-weight: bold;
+}

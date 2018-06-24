@@ -30,6 +30,35 @@ function isExtensionPopupActive() {
 }
 
 /**
+   Prepends given value to the given array
+
+   @return new array
+*/
+function prepend(value, array) {
+	var newArray = array.slice();
+	newArray.unshift(value);
+	return newArray;
+}
+
+/**
+   Checks if given arrays are equal
+
+   @return true if arrays are identical, false otherwise
+*/
+function arraysEqual(arr1, arr2) {
+    if(arr1.length !== arr2.length) {
+        return false;
+    }
+    for(var i = 0; i < arr1.length; i++) {
+        if(arr1[i] !== arr2[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
    Opens and handles ontologies selector popup, assigns ontologies to input fields
 */
 function open_and_handle_selector_popup() {
@@ -56,6 +85,10 @@ function open_and_handle_selector_popup() {
 			} else {
 				// Storing selected ontologies in variable
 				defaultOntologies = ontology_ids_selector.getValue().toString();
+				if(typeof(Storage) !== "undefined") {
+					console.log(localStorage.defaultOntologies);
+			        localStorage.setItem('defaultOntologies', defaultOntologies);
+			    }
 			}
 
 			if(useRecommenderSearch) {
@@ -84,63 +117,79 @@ function open_and_handle_selector_popup() {
 			}
 	       	
 			var searchPerformed = false;
-			jQuery('input:text:not(#ontology_ids-selectized)').each(function() { // Iterating input fields
-		       	var $element = jQuery(this); 
-	       		var $label = jQuery("label[for='" + this.id + "']");
+			if(jQuery('input:text:not(#ontology_ids-selectized)').length == 0) {
+				loader.close();
+				document.querySelector('.tingle-modal.handling_search_popup').remove();
+			} else {
+				if(useRecommenderSearch) {
+					if(typeof(Storage) !== "undefined" && localStorage.bioPortalRecommenderCache && parseInt(localStorage.bioPortalRecommenderCacheLastUpdated) + 86400 > parseInt(Date.now() / 1000)) {
+						bioPortalRecommenderCache = JSON.parse(localStorage.bioPortalRecommenderCache);
+					}
+				}
+				jQuery('input:text:not(#ontology_ids-selectized)').each(function() { // Iterating input fields
+			       	var $element = jQuery(this); 
+		       		var $label = jQuery("label[for='" + this.id + "']");
 
-	       		// Defining callback function
-	       		callback = function(recommenderOntologies) {
-					var defaultOntologiesArray = defaultOntologies.toString().split(","); // Convert string into array for array-array comparsion to find the intersection
-				
-					// Finding the intersection of found ontologies and ontologies selected by user
-					var qualifiedOntologies = defaultOntologiesArray.filter(function(ontology) {
-						return recommenderOntologies.indexOf(ontology) !== -1;
-					});
-					
-					// Assigning qualified ontology ids to the input field
-					if(qualifiedOntologies.length > 0) {
-						if($element.attr('class') != undefined) {
-							$element.attr('class', $element.attr('class').replace(/[ ]*bp_form_complete-[a-zA-Z0-9_,]*-name/g, ''));
+		       		// Defining callback function
+		       		callback = function(recommenderOntologies) {
+						if(defaultOntologies !== 'all_ontologies') {
+							var defaultOntologiesArray = defaultOntologies.toString().split(","); // Convert string into array for array-array comparsion to find the intersection
+						
+							// Finding the intersection of found ontologies and ontologies selected by user
+							var qualifiedOntologies = defaultOntologiesArray.filter(function(ontology) {
+								return recommenderOntologies.indexOf(ontology) !== -1;
+							});
+						} else {
+							var qualifiedOntologies = recommenderOntologies;
 						}
-						$element.attr("data-ontologies", qualifiedOntologies.join(',')); // Ontologies for input field should be set this way
-						$element.addClass("bp_form_complete-" + qualifiedOntologies.join(',') + "-name"); // Saved for back support
+						
+						// Assigning qualified ontology ids to the input field
+						if(qualifiedOntologies.length > 0) {
+							if($element.attr('class') != undefined) {
+								$element.attr('class', $element.attr('class').replace(/[ ]*bp_form_complete-[\S]*?-name/g, ''));
+							}
+							$element.attr("data-ontologies", qualifiedOntologies.join(',')); // Ontologies for input field should be set this way
+							$element.addClass("bp_form_complete-" + qualifiedOntologies.join(',') + "-name"); // Saved for back support
+						} else {
+							if($element.attr('class') != undefined) {
+								$element.attr('class', $element.attr('class').replace(/[ ]*bp_form_complete-[\S]*?-name/g, ''));
+							}
+							$element.attr("data-ontologies", (defaultOntologies !== 'all_ontologies' ? defaultOntologiesArray.join(',') : '')); // Ontologies for input fields should be set this way
+							$element.addClass("bp_form_complete-" + (defaultOntologies !== 'all_ontologies' ? defaultOntologiesArray.join(',') : '') + "-name"); // Saved for back support
+						}
+						$element.attr("data-bp_include_definitions", "true");
+						$element.css('background-color', '#f9f9d2');
+
+						// If search is performed using recommender and it's the last input field, then closing popup and executing autocomplete code
+						if(($label.length > 0 || $element.attr('aria-label')) != undefined && useRecommenderSearch && typeof activeRequestsToBioPortal == "number" && activeRequestsToBioPortal == 1) {
+						    loader.close();
+							document.querySelector('.tingle-modal.handling_search_popup').remove();
+
+		       				localStorage.setItem('bioPortalRecommenderCache', JSON.stringify(bioPortalRecommenderCache));
+
+							loadScript(chrome.extension.getURL('cod_complete.js'));
+						}
+					}
+					// Running search for input field or assigning all selected ontologies (if there is nothing to search by)
+		       		if($label.length > 0) {
+		       			searchPerformed = true;
+		       			if(useRecommenderSearch) {
+		       				searchOntologiesUsingBioportal($label.text(), callback); // Search of relevant ontologies using BioPortal Recommender
+		       			} else {
+							searchOntologies($label.text(), callback); // Local search of relevant ontologies
+						}
+					} else if($element.attr('aria-label') != undefined) {
+		       			searchPerformed = true;
+		       			if(useRecommenderSearch) {
+		       				searchOntologiesUsingBioportal($element.attr('aria-label'), callback); // Search of relevant ontologies using BioPortal Recommender
+		       			} else {
+							searchOntologies($element.attr('aria-label'), callback); // Local search of relevant ontologies
+						}
 					} else {
-						if($element.attr('class') != undefined) {
-							$element.attr('class', $element.attr('class').replace(/[ ]*bp_form_complete-[a-zA-Z0-9_,]*-name/g, ''));
-						}
-						$element.attr("data-ontologies", defaultOntologiesArray.join(',')); // Ontologies for input fields should be set this way
-						$element.addClass("bp_form_complete-" + defaultOntologiesArray.join(',') + "-name"); // Saved for back support
+		       			callback([]);
 					}
-					$element.attr("data-bp_include_definitions", "true");
-					$element.css('background-color', '#f9f9d2');
-
-					// If search is performed using recommender and it's the last input field, then closing popup and executing autocomplete code
-					if(($label.length > 0 || $element.attr('aria-label')) != undefined && useRecommenderSearch && typeof activeRequestsToBioPortal == "number" && activeRequestsToBioPortal == 1) {
-					    loader.close();
-						document.querySelector('.tingle-modal.handling_search_popup').remove();
-
-						loadScript(chrome.extension.getURL('cod_complete.js'));
-					}
-				}
-				// Running search for input field or assigning all selected ontologies (if there is nothing to search by)
-	       		if($label.length > 0) {
-	       			searchPerformed = true;
-	       			if(useRecommenderSearch) {
-	       				searchOntologiesUsingBioportal($label.text(), callback); // Search of relevant ontologies using BioPortal Recommender
-	       			} else {
-						searchOntologies($label.text(), callback); // Local search of relevant ontologies
-					}
-				} else if($element.attr('aria-label') != undefined) {
-	       			searchPerformed = true;
-	       			if(useRecommenderSearch) {
-	       				searchOntologiesUsingBioportal($element.attr('aria-label'), callback); // Search of relevant ontologies using BioPortal Recommender
-	       			} else {
-						searchOntologies($element.attr('aria-label'), callback); // Local search of relevant ontologies
-					}
-				} else {
-	       			callback([]);
-				}
-			});
+				});
+			}
 
 			if(useRecommenderSearch && searchPerformed) {
 				// Opening loader popup if there is ajax search request
@@ -166,11 +215,19 @@ function open_and_handle_selector_popup() {
 
 		// Getting user selected (or defualt) ontology ids
 		if(typeof defaultOntologies === "undefined") {
-			defaultOntologies = 'NCBITAXON,DOID,GO,OBI,PR,IDO,CL';
+			if(typeof(Storage) !== "undefined" && localStorage.defaultOntologies) {
+				defaultOntologies = localStorage.defaultOntologies;
+			} else {
+				defaultOntologies = 'NCBITAXON,DOID,GO,OBI,PR,IDO,CL';
+			}
+		} else {
+			if(typeof(Storage) !== "undefined" && localStorage.defaultOntologies) {
+				defaultOntologies = localStorage.defaultOntologies;
+			}
 		}
 		// Showing ontologies dropdown list
 		var $select = jQuery('select#ontology_ids').selectize({
-			options: allOntologies,
+			options: prepend({value: 'all_ontologies', text: 'All Ontologies'}, allOntologies),
 			items: defaultOntologies.toString().split(','),
 			plugins: ['remove_button'],
 		    delimiter: ',',
@@ -179,6 +236,16 @@ function open_and_handle_selector_popup() {
 		    //sortField: {'field': 'text', 'direction': 'asc'}
 		});
 		var ontology_ids_selector = $select[0].selectize;
+		ontology_ids_selector.on('item_add', function(value, $item) {
+			if(value === 'all_ontologies') {
+				var curValue = ontology_ids_selector.getValue();
+				if(!arraysEqual(curValue, ['all_ontologies'])) {
+					ontology_ids_selector.setValue(['all_ontologies']);
+				}
+			} else {
+				ontology_ids_selector.removeItem('all_ontologies', true);
+			}
+		});
 	}
 }
 
@@ -213,6 +280,9 @@ function searchOntologiesUsingBioportal(text, callback) {
 
 				// Caching the response data
 				bioPortalRecommenderCache[text] = data;
+				if(typeof(Storage) !== "undefined") {
+					localStorage.setItem('bioPortalRecommenderCacheLastUpdated', parseInt(Date.now() / 1000));
+				}
 
 				// Executing a callback function, passing an array of ontology IDs
 				callback(data);
@@ -254,6 +324,9 @@ function searchOntologies(text, callback = null) {
 }
 
 if(!isExtensionPopupActive()) { // Checks whether extension popup is active to avoid 2 popups at the same time
+	if(typeof(Storage) !== "undefined" && localStorage.allOntologies && parseInt(localStorage.allOntologiesLastUpdated) + 86400 > parseInt(Date.now() / 1000)) {
+		allOntologies = JSON.parse(localStorage.allOntologies);
+	}
 	if(typeof allOntologies === 'undefined') { // If first run on the page (variable, storing all the ontologies, is not defined)
 		// Creating (but not showing) first run loader popup
 		var loader = new tingle.modal({
@@ -288,6 +361,10 @@ if(!isExtensionPopupActive()) { // Checks whether extension popup is active to a
 				allOntologies = [];
 				for(i = 0; i < data.length; i++) {
 					allOntologies.push({value: data[i]['acronym'], text: data[i]['name']});
+		        }
+		        if(typeof(Storage) !== "undefined") {
+		        	localStorage.setItem('allOntologies', JSON.stringify(allOntologies));
+		        	localStorage.setItem('allOntologiesLastUpdated', parseInt(Date.now() / 1000));
 		        }
 
 				// Closing first run loader popup
